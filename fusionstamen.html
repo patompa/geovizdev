@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Google FusionTables and Stamen Maps</title>
+<style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #map-buttons {
+        position: fixed;
+        z-index: 100;
+        top: 0;
+        left: 0;
+      }
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.2.4"></script>
+<script>
+var map;
+var stamenlayer = "toner";
+var isHeat = true;
+var zoom = -1;
+var center = -1;
+function initialize() {
+  if (zoom != -1) {
+     zoom = map.getZoom();
+  } else {
+      zoom = 4;
+  }
+  if (center != -1) {
+      center = map.getCenter();
+  } else {
+      center = new google.maps.LatLng(41.8819,-87.67278);
+  }
+  var mapOptions = {
+    zoom: zoom,
+    center: center,
+    disableDefaultUI: true,
+    mapTypeId: stamenlayer,
+    mapTypeControlOptions: {
+         mapTypeIds: [stamenlayer]
+    }
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  heatlayer = getLayer(true);
+  markerlayer = getLayer(false);
+}
+
+
+function getLayer(doHeat) {
+  var layer = new google.maps.FusionTablesLayer({
+    query: {
+      select: 'location',
+      from: '1AG4tCmC0CRUMQ4KECBpWePRuq_hbMwHHt_6OD40'
+    },
+    heatmap: {
+      enabled: doHeat
+    }
+  });
+  return layer;
+}
+
+
+var heatlayer;
+var markerlayer;
+function setLayer(doHeat) {
+  isHeat = doHeat;
+  if (doHeat) {
+      markerlayer.setMap(null);
+      heatlayer.setMap(map);
+  } else {
+      heatlayer.setMap(null);
+      markerlayer.setMap(map);
+  }
+  var stamenMap = new google.maps.StamenMapType(stamenlayer);
+  map.mapTypes.set(stamenlayer, stamenMap);
+}
+function changeLayer(value) {
+  stamenlayer = value;
+  initialize();
+  setLayer(isHeat);
+}
+google.maps.event.addDomListener(window, 'load', function () {initialize();setLayer(isHeat)});
+</script>
+</head>
+<body>
+  <div id="map-canvas"></div>
+  <div id="map-buttons"><button onclick="setLayer(true)">Heatmap</button><button onclick="setLayer(false)">Markers</button>
+     <select id="layerTypes" onchange="changeLayer(this.value)">
+        <option>toner</option>
+        <option>terrain</option>
+        <option>watercolor</option>
+     </select>
+  </div>
+</body>
+</html>
