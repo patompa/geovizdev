@@ -47,7 +47,7 @@ var svg = d3.select("body").append("svg")
 
 queue()
     .defer(d3.json, "us.json")
-    .defer(d3.tsv, "geovizcounty.tsv", function(d) { rateById.set(d.county, +d.count); })
+    .defer(d3.tsv, "../utils/sample1loccounty.tsv", function(d) { rateById.set(d.county, +d.count); })
     .await(ready);
 
 function ready(error, us) {

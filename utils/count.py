@@ -8,8 +8,8 @@ for line in cfile:
     counties[line.strip()] = 0.5
 cfile.close()
 
-f = open('../geovizsample.tsv')
-countyout = open('geovizcounty.tsv','w')
+f = open('sample1loc.tsv')
+countyout = open('sample1loccounty.tsv','w')
 countytot = {}
 lines = f.read().strip().split('\n')
 f.close()
