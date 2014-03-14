@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+  <script src='colorthemes.js'></script> 
+</head>
+<body>
+<canvas id="myCanvas" width="500" height="500" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+var points = [];
+function drawPoint(x,y,r,i) {
+  points.push([x,y,r,i]);
+  var c=document.getElementById("myCanvas");
+  var ctx=c.getContext("2d");
+  ctx.globalCompositeOperation = "darker";
+  var radialGradient = ctx.createRadialGradient(x, y, i, x, y, r);
+  radialGradient.addColorStop(0, 'rgba(0,0,0,0.99)');
+  radialGradient.addColorStop(1, 'rgba(255,255,255,0.99)');
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+  ctx.fillStyle = radialGradient;
+  ctx.fill();
+}
+
+function clearColor() {
+  var c=document.getElementById("myCanvas");
+  var ctx=c.getContext("2d");
+  ctx.clearRect(0,0,500,500);
+  points = [];
+}
+
+function clearColor() {
+  var c=document.getElementById("myCanvas");
+  var ctx=c.getContext("2d");
+  ctx.clearRect(0,0,500,500);
+  var oldpoints = points;
+  points = [];
+  for (var i=0; i< oldpoints.length;i++) {
+     p = oldpoints[i]; 
+     drawPoint(p[0],p[1],p[2],p[3]);
+  }
+}
+
+var theme = 'classic';
+
+function colorize() {
+  var c=document.getElementById("myCanvas");
+  var ctx=c.getContext("2d");
+
+  var imgd = ctx.getImageData(0, 0, 500, 500);
+  var pix = imgd.data;
+
+// Loop over each pixel and invert the color.
+  for (var i = 0, n = pix.length; i < n; i += 4) {
+    r = pix[i ];
+    g = pix[i+1];
+    b = pix[i+2];
+    a = pix[i+3];
+    if (a == 1) {
+        continue;
+    }
+    score = luminance(r,g,b)
+    col = COLORTHEME[theme][score];
+    pix[i] = col[0]
+    pix[i+1] = col[1]
+    pix[i+2] = col[2] 
+  }
+  ctx.putImageData(imgd, 0, 0);
+}
+
+function luminance(r,g,b) {
+   // CCIR601 approximation 
+   return Math.round((r + r + b + g + g+ g)/6);
+}
+
+// Draw the ImageData at the given (x,y) coordinates.
+
+function changeTheme(t) {
+   theme = t;
+}
+
+var downX = -1;
+var downY = -1;
+var timeDown = 0;
+var upX = -1;
+var upY = -1
+
+$( "#myCanvas" ).mousedown(function(e) {
+  downX = e.pageX;
+  downY = e.pageY;
+  timeDown = new Date().getTime();
+});
+
+$( "#myCanvas" ).mouseup(function(e) {
+  upX = e.pageX;
+  upY = e.pageY;
+  if (downX != -1 && downY != -1) {
+     var elapsed = Math.round((new Date().getTime() - timeDown)/1000);
+     elapsed = Math.min(elapsed,10)*2;
+     r = Math.round(Math.sqrt(Math.pow(downX-upX,2)+Math.pow(downY-upY,2))/2);
+     drawPoint(downX,downY,r,elapsed);
+     downX = -1;
+     downY = -1;
+  } else {
+     downX = -1;
+     downY = -1;
+     upX = -1;
+     upY = -1;
+  }
+});
+
+
+
+
+</script><p>
+Click and drag in the area above to create heat points. <p>
+The time the mouse is down determines
+intensity and the distance you drag determines size.<p>
+<br>
+<select onchange="changeTheme(this.value)">
+        <option>classic</option>
+        <option>fire</option>
+        <option>omg</option>
+        <option>pbj</option>
+        <option>pgaitch</option>
+</select>
+
+<button onclick="colorize()">Colorize</button>
+<button onclick="clearColor()">Clear Color</button>
+<button onclick="clear()">Clear</button>
+
+</body>
+</html>
