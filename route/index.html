@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Route Visualization</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #panel {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        margin-left: -180px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+      }
+    </style>
+    <style>
+      #directions-panel {
+        height: 100%;
+        float: right;
+        width: 390px;
+        overflow: auto;
+        font-family: Arial;
+      }
+
+      #button {
+        background-color: #FFFFFF;
+        color: #FFFF00;
+        float: center;
+      }
+
+      #map-canvas {
+        margin-right: 400px;
+      }
+
+      #control {
+        background: #fff;
+        padding: 5px;
+        font-size: 14px;
+        font-family: Arial;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+        display: none;
+      }
+
+      @media print {
+        #map-canvas {
+          height: 500px;
+          margin: 0;
+        }
+
+        #directions-panel {
+          float: none;
+          width: auto;
+        }
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&language=en"></script>
+    <script type="text/javascript" src="http://google-maps-utility-library-v3.googlecode.com/svn/trunk/routeboxer/src/RouteBoxer.js"></script>
+    <script src="mongo.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+
+    <script>
+
+var sentimentValue = [];
+var sentiThreshold = 0.8;
+
+var boxpolys = null;
+var directions = null;
+var routeBoxer = null;
+var distance = 0.1; // km
+var boxes = null;
+var map = null;
+var polyOptions = {
+  strokeColor: '#29088A',
+  strokeOpacity: 0.7,
+  strokeWeight: 4
+}
+
+var rendererOptions = {
+  draggable: true,
+  suppressBicyclingLayer: true,
+  polylineOptions: polyOptions,
+};
+
+var SentimentScore = 0;
+
+var iterator = 0;
+var markers =[];
+
+
+var crimes = [];
+var infos = [];
+
+
+function initialize() {
+
+  directionsService = new google.maps.DirectionsService();
+  directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+
+
+  routeBoxer = new RouteBoxer();
+
+  // Create an array of styles.
+  var styles = [
+    {
+      stylers: [
+        { hue: "#00d4ff" },
+        { saturation: -90 }
+      ]
+    },{
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [
+        { saturation: -95 },
+        { lightness: 10 },
+        { visibility: "simplified" }
+      ]
+    },{
+      featureType: "road",
+      elementType: "labels",
+      stylers: [
+        { visibility: "off" }
+      ]
+    },{
+      featureType: "water",
+      stylers:[
+        { hue: "#A9D0F5" },
+        { lightness: -10 },
+        { saturation: 50 }
+      ]
+    },{
+      featureType: "poi.business",
+      elementType: "labels",
+      stylers: [
+        { visibility: "off" }
+      ]
+    }
+  ];
+
+  // Create a new StyledMapType object, passing it the array of styles,
+  // as well as the name to be displayed on the map type control.
+  var styledMap = new google.maps.StyledMapType(styles,
+    {name: "Styled Map"});
+
+  var mapOptions = {
+    zoom: 11,
+    center: new google.maps.LatLng(41.850033, -87.6500523),
+    disableDefaultUI: true,
+
+    mapTypeControlOptions:{
+      mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'map_style']
+    }
+ 
+  };
+
+  map = new google.maps.Map(document.getElementById('map-canvas'),
+      mapOptions);
+
+  map.mapTypes.set('map_style', styledMap);
+  map.setMapTypeId('map_style');
+
+  
+  var ctaLayer = new google.maps.KmlLayer('https://dl.dropboxusercontent.com/s/229utvlmt7dlt0u/chicago_community.kml?dl=1&token_hash=AAGoAj7lfRLYY1kqaxAdtSxD5jrYDBqxFBqaSpCY-oyIGQ',
+    {suppressInfoWindows: false},
+    {clickable: true}
+    );
+
+
+  ctaLayer.setMap(map);
+
+  directionsDisplay.setMap(map);
+
+  directionsDisplay.setPanel(document.getElementById('directions-panel'));
+
+  var control = document.getElementById('control');
+  control.style.display = 'block';
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(control);
+
+
+  google.maps.event.addListener(directionsDisplay, 'directions_changed', function() {
+    computeTotalDistance(directionsDisplay.getDirections());
+
+    clearBoxes();  
+
+    var on_path = directionsDisplay.getDirections().routes[0].overview_path;
+    boxes = routeBoxer.box(on_path, distance);
+    
+    drawBoxes(boxes); 
+    deleteOverlayMarkers();
+    iterator = 0;
+    drop(boxes);    
+
+  });
+
+  var contentString = '<div id="content">';
+
+  var infowindow = new google.maps.InfoWindow({
+      content: contentString
+  });
+
+  var crimescore = 0;
+  function drop(boxes) {
+    crimescore = 0;
+    for (var i = 0; i < boxes.length; i++) {
+        getCrime(boxes[i],i, function (crimes, index) {
+               crimescore += crimes['count'];
+               $('#crimescoreval').html(crimescore);
+               for (var j=0; j < crimes['crimes'].length; j++) {
+               var crime = crimes['crimes'][j];
+               // console.log(crime);
+               markers.push(new google.maps.Marker({
+               position: new google.maps.LatLng(crime['lat'],crime['lon']),
+               map: map,
+               icon: goldStar,
+               title: crime['text'],
+               animation: google.maps.Animation.DROP
+      })); }; });    
+     };
+  }
+
+  var goldStar="crimescene.png";
+
+  function addMarker(){
+     markers.push(new google.maps.Marker({
+        position: crimes[iterator],
+        map: map,
+        icon: goldStar,
+        title: 'Crime',
+        animation: google.maps.Animation.DROP
+      }));    
+     iterator++;
+  }
+}
+
+var start = "university of chicago";
+var end = "Humboldt Park Library";
+var selectedMode = "BICYCLING";
+
+function setDirection(){
+
+  start = document.getElementById('start').value;
+  end = document.getElementById('end').value;
+  selectedMode = document.getElementById('mode').value;
+
+  if (selectedMode == 'WALKING'){
+    distance = 0.2;
+    
+  }
+
+  else if (selectedMode == 'DRIVING'){
+    distance = 0.05;
+
+  }
+
+  else if (selectedMode == 'BICYCLING'){
+    distance = 0.1;
+
+  }
+
+  else{
+    distance = 0.08;
+
+  }
+}
+
+function calcRoute() { 
+  clearBoxes();
+  console.log(start);
+  console.log(end);
+  var request = {
+    origin: start,
+    destination: end,
+    travelMode: google.maps.TravelMode[selectedMode]
+    // DRIVING, WALKING, BICYCLING, TRANSIT
+
+  };
+      // Clear any previous route boxes from the map
+  console.log(request);
+  directionsService.route(request, function(response, status) {
+    if (status == google.maps.DirectionsStatus.OK) {
+      directionsDisplay.setDirections(response);
+
+    } else {
+      alert("Directions query failed: " + status);      
+    }
+    
+  });
+}
+
+function drawBoxes(boxes) {
+    getSentiments(boxes,function (sentimentMap) {drawSentimentBoxes(boxes,sentimentMap)});
+}
+ 
+// Draw the array of boxes as polylines on the map - RouteBoxer algorithm
+function drawSentimentBoxes(boxes,sentimentMap) {
+  SentimentScore = 0;
+  boxpolys = new Array(boxes.length);
+  for (var i = 0; i < boxes.length; i++) {
+    sentimentValue[i] = sentimentMap["" + i];
+    SentimentScore += sentimentValue[i];
+
+    var sentimentColor = '#FF0000';
+
+    if (sentimentValue[i] != 0){
+      boxpolys[i] = new google.maps.Rectangle({
+        bounds: boxes[i],
+        fillOpacity: Math.abs(sentimentValue[i]),
+        strokeOpacity: 0.0,
+        fillColor: sentimentColor,
+        strokeWeight: 1,
+        map: map,
+        clickable: false
+      });
+    }
+
+    else{
+        boxpolys[i] = new google.maps.Rectangle({
+        bounds: boxes[i],
+        fillOpacity: 0.4,
+        strokeOpacity: 0.0,
+        fillColor: '#000000',
+        strokeWeight: 1,
+        map: map,
+        clickable: false
+      });
+    }
+    // console.log(boxpolys[i]);
+  }
+    SentimentScore /= boxes.length;
+    SentimentScore = 100 - SentimentScore * 100;
+    console.log('updating sentiment score');
+    document.getElementById('SentimentScore').innerHTML = Math.round(SentimentScore,2);
+}
+
+// Clear boxes currently on the map
+function clearBoxes() {
+  if (boxpolys != null) {
+    for (var i = 0; i < boxpolys.length; i++) {
+      boxpolys[i].setMap(null);
+    }
+  }
+  boxpolys = null;
+}
+
+// Deletes all markers in the array by removing references to them
+function deleteOverlayMarkers() {
+  if (markers) {
+    for (i in markers) {
+      markers[i].setMap(null);
+    }
+    markers.length = 0;
+  }
+}
+
+function computeTotalDistance(result) {
+  var total = 0;
+  var myroute = result.routes[0];
+  for (var i = 0; i < myroute.legs.length; i++) {
+    total += myroute.legs[i].distance.value;
+  }
+  total = total / 1000.0;
+  document.getElementById('total').innerHTML = total + ' km';
+}
+
+function showValueSentiThresh(newValue) {
+  sentiThreshold = newValue/10;
+  document.getElementById('sentimentThreshold').innerHTML=newValue/10;
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="control">
+      <strong>Start:</strong>
+      <select id="start" onchange="setDirection();">
+        <option value="university of chicago" selected="selected">Chicago University</option>
+         <option value="marquette park">Marquette park</option>
+        <option value="60617 Illinois, Chicago, S Doty Ave">Harborside golf center</option>
+        <option value="Harwood Heights, IL 60706">Noridge park</option>
+        <option value="Lincoln Park Zoo, North Clark Street, Chicago, IL, United States">Lincoln park zoo</option>
+        <option value="Humboldt Park Public Library, North Troy Street, Chicago, IL, United States">Humboldt Park Library</option>
+      </select>
+      <strong>End:</strong>
+      <select id="end" onchange="setDirection();">
+         <option value="university of chicago">Chicago University</option>
+        <option value="marquette park">Marquette park</option>
+        <option value="60617 Illinois, Chicago, S Doty Ave">Harborside golf center</option>
+        <option value="Harwood Heights, IL 60706">Noridge park</option> 
+        <option value="Lincoln Park, Chicago, IL, United States">Lincoln Park</option>
+        <option value="Humboldt Park Public Library, North Troy Street, Chicago, IL, United States" selected="selected">Humboldt Park Library</option>
+        <option value="Kucinski-Murphy Park, Chicago, IL, United States">Kucinski-Murphy Park</option>
+      </select>
+      <strong>Mode:</strong>
+      <select id="mode" onchange="setDirection();">
+        <option value="BICYCLING" selected="selected">BICYCLING</option>
+        <option value="WALKING">WALKING</option>
+        <option value="DRIVING">DRIVING</option>
+      </select>
+      <button type="button" onclick="calcRoute();">Go</button>
+
+    </div>
+    <div id="directions-panel">
+      <p><font size = 5><b>Route</b></font></p>
+      Adapted from <a href="http://mia.kaist.ac.kr/project/socroutes/">WWW 2014 SocRoutes Demo</a>
+      <p><font size = 3>Total Distance: <span id="total"></span></p>
+      <p><font size = 3>Sentiment Score: <span id="SentimentScore"></span></p>
+      <p><font size = 3>Crime Score: <span id="crimescoreval"></span></p>
+      <br>
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
