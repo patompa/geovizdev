@@ -48,8 +48,8 @@ var projection = d3.geo.albersUsa()
 var path = d3.geo.path()
     .projection(projection);
 
-var lat = 36.323424; 
-var lon = -94.394531;
+var clat = 36.323424; 
+var clon = -94.394531;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
@@ -76,7 +76,7 @@ function drawMarker(lat,lon) {
    if (xy == null) {
        return;
    }
-   geo.drawPoint(xy[0]+6,xy[1]+6,5,0.0005);
+   geo.drawPoint(xy[0]+5,xy[1]+5,5,0.0005);
 }
 
 d3.select(self.frameElement).style("height", height + "px");
@@ -101,7 +101,7 @@ function changeTheme(theme) {
 
 
 </script>
-<canvas class="mapcanvas" id="myCanvas" width="960" height="500" style="border:1px solid #c3c3c3;">
+<canvas class="mapcanvas" id="myCanvas" width="960" height="500">
 Your browser does not support the HTML5 canvas tag.
 </canvas><p>
 <select onchange="changeTheme(this.value)">
