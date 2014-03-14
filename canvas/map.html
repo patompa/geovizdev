@@ -76,7 +76,7 @@ function drawMarker(lat,lon) {
    if (xy == null) {
        return;
    }
-   geo.drawPoint(xy[0]+5,xy[1]+5,5,0.0005);
+   geo.drawPoint(xy[0]+5,xy[1]+5,6,0.5);
 }
 
 d3.select(self.frameElement).style("height", height + "px");

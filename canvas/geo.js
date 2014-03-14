@@ -8,7 +8,7 @@ var Geo = function(canvas) {
     ctx.globalCompositeOperation = "darker";
     var radialGradient = ctx.createRadialGradient(x, y, i, x, y, r);
     radialGradient.addColorStop(0, 'rgba(0,0,0,0.99)');
-    radialGradient.addColorStop(1, 'rgba(255,255,255,0.99)');
+    radialGradient.addColorStop(1, 'rgba(150,150,150,0.99)');
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.fillStyle = radialGradient;
