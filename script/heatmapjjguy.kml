@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Folder>
+    <GroundOverlay>
+      <Icon>
+        <href>heatmapjjguy.png</href>
+      </Icon>
+      <LatLonBox>
+        <north>64.8395718099999954</north>
+        <south>-34.4159644000000000</south>
+        <east>-158.1870368600000063</east>
+        <west>2.3627424399999999</west>
+        <rotation>0</rotation>
+      </LatLonBox>
+    </GroundOverlay>
+  </Folder>
+</kml>
