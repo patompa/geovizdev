@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+  <script src='colorthemes.js'></script> 
+  <script src='geo.js'></script> 
+</head>
+<body>
+<canvas id="myCanvas" width="500" height="500" style="border:1px solid #c3c3c3;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+
+var geo;
+
+var downX = -1;
+var downY = -1;
+var timeDown = 0;
+var upX = -1;
+var upY = -1
+
+$( "#myCanvas" ).mousedown(function(e) {
+  downX = e.pageX;
+  downY = e.pageY;
+  timeDown = new Date().getTime();
+});
+
+$( "#myCanvas" ).mouseup(function(e) {
+  upX = e.pageX;
+  upY = e.pageY;
+  if (downX != -1 && downY != -1) {
+     var elapsed = Math.round((new Date().getTime() - timeDown)/1000);
+     elapsed = Math.min(elapsed,10)*2;
+     r = Math.round(Math.sqrt(Math.pow(downX-upX,2)+Math.pow(downY-upY,2))/2);
+     geo.drawPoint(downX,downY,r,elapsed);
+     downX = -1;
+     downY = -1;
+  } else {
+     downX = -1;
+     downY = -1;
+     upX = -1;
+     upY = -1;
+  }
+});
+
+
+$( document ).ready(function() {
+   geo = Geo(document.getElementById("myCanvas"));
+});
+
+
+</script><p>
+Click and drag in the area above to create heat points. <p>
+The time the mouse is down determines
+intensity and the distance you drag determines size.<p>
+<br>
+<select onchange="geo.changeTheme(this.value)">
+        <option>classic</option>
+        <option>fire</option>
+        <option>omg</option>
+        <option>pbj</option>
+        <option>pgaitch</option>
+</select>
+
+<button onclick="geo.colorize()">Colorize</button>
+<button onclick="geo.clearColor()">Clear Color</button>
+<button onclick="geo.clear()">Clear</button>
+<a href="map.html">Map example</a>
+
+</body>
+</html>

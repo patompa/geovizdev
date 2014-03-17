@@ -1,0 +1,36 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="http://static.openheatmap.com/scripts/jquery.openheatmap.js"></script>
+<script type="text/javascript" src="http://static.openheatmap.com/scripts/common.js"></script>
+<script type='text/javascript'>
+$(document).ready(function()
+{
+    $('#openheatmap_container').insertOpenHeatMap({
+        width: 800, 
+        height: 600,
+        source: 'openheatmap.swf'
+    });
+});
+
+function onMapCreated()
+{
+    var map = $.getOpenHeatMap();
+    map.setLatLonViewingArea(50, -126.58, 15, -66.73)
+
+    map.loadWaysFromFile('http://static.openheatmap.com/us_counties.osm');
+    map.loadValuesFromFile('latlon.csv');
+    
+    map.setSetting('show_map_tiles', true);
+    map.setSetting('gradient_value_min',5);
+    map.setSetting('gradient_value_max',500);
+    map.setSetting('is_gradient_value_range_set',True);
+    map.setSetting('point_blob_radius',0.2);
+}
+</script>
+</head>
+<body>
+<a href="index.html">Back to County Map</a>
+<div id="openheatmap_container"></div>
+</body>
+</html>
