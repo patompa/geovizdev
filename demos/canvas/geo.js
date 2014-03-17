@@ -1,14 +1,21 @@
-var Geo = function(canvas) {
+var Geo = function(canvas,options) {
+  if (typeof(options) === "undefined") {
+     options = {}
+  }
+  if (typeof(options.maxcolor) === "undefined") {
+     options.maxcolor = 200;
+  }
+  var opt = options;
   var myCanvas = canvas;
   var ctx=myCanvas.getContext("2d");
   var theme = 'classic';
   var points = [];
   function drawPoint(x,y,r,i) {
     points.push([x,y,r,i]);
-    ctx.globalCompositeOperation = "darker";
+    ctx.globalCompositeOperation = "lighter";
     var radialGradient = ctx.createRadialGradient(x, y, i, x, y, r);
-    radialGradient.addColorStop(0, 'rgba(0,0,0,0.99)');
-    radialGradient.addColorStop(1, 'rgba(150,150,150,0.99)');
+    radialGradient.addColorStop(0, 'rgba(' + opt.maxcolor + "," + opt.maxcolor + "," + opt.maxcolor + ',0.99)');
+    radialGradient.addColorStop(1, 'rgba(0,0,0,0.99)');
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.fillStyle = radialGradient;
@@ -16,7 +23,7 @@ var Geo = function(canvas) {
   }
 
   function clear() {
-    var ctx=c.getContext("2d");
+    var ctx=myCanvas.getContext("2d");
     ctx.clearRect(0,0,myCanvas.width,myCanvas.height);
     points = [];
   }
@@ -44,7 +51,7 @@ var Geo = function(canvas) {
         continue;
       }
       score = luminance(r,g,b)
-      col = COLORTHEME[theme][score];
+      col = COLORTHEME[theme][255-score];
       pix[i] = col[0]
       pix[i+1] = col[1]
       pix[i+2] = col[2] 
