@@ -9,10 +9,14 @@
 <canvas id="myCanvas" width="500" height="500" style="border:1px solid #c3c3c3;">
 Your browser does not support the HTML5 canvas tag.
 </canvas>
+<canvas id="myDrawCanvas" width="500" height="500" style="position:absolute; top:9px; left:9px;z-index:2;">
+Your browser does not support the HTML5 canvas tag.
+</canvas>
 
 <script>
 
 var geo;
+var geoDraw;
 
 var downX = -1;
 var downY = -1;
@@ -20,16 +24,29 @@ var timeDown = 0;
 var upX = -1;
 var upY = -1
 
-$( "#myCanvas" ).mousedown(function(e) {
+$( "#myDrawCanvas" ).mousedown(function(e) {
   downX = e.pageX;
   downY = e.pageY;
   timeDown = new Date().getTime();
 });
 
-$( "#myCanvas" ).mouseup(function(e) {
+$( "#myDrawCanvas" ).mousemove(function(e) {
+  var x = e.pageX;
+  var y = e.pageY;
+  if (downX != -1 && downY != -1) {
+     geoDraw.clear();
+     var elapsed = Math.round((new Date().getTime() - timeDown)/1000);
+     elapsed = Math.min(elapsed,10)*2;
+     r = Math.round(Math.sqrt(Math.pow(downX-x,2)+Math.pow(downY-y,2))/2);
+     geoDraw.drawPoint(downX,downY,r,elapsed);
+  }
+});
+
+$( "#myDrawCanvas" ).mouseup(function(e) {
   upX = e.pageX;
   upY = e.pageY;
   if (downX != -1 && downY != -1) {
+     geoDraw.clear();
      var elapsed = Math.round((new Date().getTime() - timeDown)/1000);
      elapsed = Math.min(elapsed,10)*2;
      r = Math.round(Math.sqrt(Math.pow(downX-upX,2)+Math.pow(downY-upY,2))/2);
@@ -47,6 +64,7 @@ $( "#myCanvas" ).mouseup(function(e) {
 
 $( document ).ready(function() {
    geo = Geo(document.getElementById("myCanvas"));
+   geoDraw = Geo(document.getElementById("myDrawCanvas"));
 });
 
 
