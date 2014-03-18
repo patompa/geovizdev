@@ -76,13 +76,13 @@ function drawMarker(lat,lon) {
    if (xy == null) {
        return;
    }
-   geo.drawPoint(xy[0]+5,xy[1]+5,4,0.01);
+   geo.drawPoint(xy[0]+5,xy[1]+5,6,0.01);
 }
 
 d3.select(self.frameElement).style("height", height + "px");
 
 $( document ).ready(function() {
-   geo = Geo(document.getElementById("myCanvas"), {maxcolor:20});
+   geo = Geo(document.getElementById("myCanvas"), {maxcolor:5});
    d3.json("../utils/sample1.json", function(error, sample) {
       for (var i = 0; i < sample.locations.length; i++) {
          drawMarker(sample.locations[i].lat,sample.locations[i].lon);
