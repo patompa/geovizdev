@@ -7,6 +7,9 @@ var Geo = function(canvas,options) {
   }
   var opt = options;
   var myCanvas = canvas;
+  if (typeof(options.align) !== "undefined") {
+     align(options.align);
+  }
   var ctx=myCanvas.getContext("2d");
   var theme = 'classic';
   var points = [];
@@ -67,6 +70,17 @@ var Geo = function(canvas,options) {
   function changeTheme(t) {
     theme = t;
   }
+
+  function align(elem) {
+    myCanvas.width = width;
+    myCanvas.height = height;
+    myCanvas.style.position = "absolute";
+    console.log("Element");
+    console.log(elem);
+    myCanvas.style.top = "" + ($(elem).offset().top-2) + "px";
+    myCanvas.style.left = "" + ($(elem).offset().left-2) + "px";
+  }
+
   return {drawPoint:drawPoint,
           clear: clear,
           clearColor: clearColor,

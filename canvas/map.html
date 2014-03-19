@@ -10,13 +10,6 @@
   z-index: 3;
 }
 
-.mapcanvas {
-  z-index: 2;
-  position:absolute;
-  top:0;
-  left:0;
-}
-
 .county-boundary {
   fill: none;
   stroke: #fff;
@@ -38,7 +31,7 @@
 <script>
 
 
-var width = 960,
+var width = 900,
     height = 500;
 
 var projection = d3.geo.albersUsa()
@@ -48,12 +41,10 @@ var projection = d3.geo.albersUsa()
 var path = d3.geo.path()
     .projection(projection);
 
-var clat = 36.323424; 
-var clon = -94.394531;
-
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
+
 
 d3.json("../d3/us.json", function(error, us) {
   svg.insert("path", ".graticule")
@@ -65,8 +56,6 @@ d3.json("../d3/us.json", function(error, us) {
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
       .attr("class", "state-boundary")
       .attr("d", path);
-
-  //svg.append("circle").attr("class","marker").attr("r",5).attr("transform", function() {return "translate(" + projection([lon,lat]) + ")";});
 });
 
 var geo;
@@ -76,13 +65,15 @@ function drawMarker(lat,lon) {
    if (xy == null) {
        return;
    }
-   geo.drawPoint(xy[0]+5,xy[1]+5,6,0.01);
+   geo.drawPoint(xy[0],xy[1],4,0.01);
 }
 
 d3.select(self.frameElement).style("height", height + "px");
 
 $( document ).ready(function() {
-   geo = Geo(document.getElementById("myCanvas"), {maxcolor:5});
+   var myCanvas = document.getElementById("myCanvas");
+   geo = Geo(myCanvas, {maxcolor:5, align: svg[0][0]});
+   
    d3.json("../utils/sample1.json", function(error, sample) {
       for (var i = 0; i < sample.locations.length; i++) {
          drawMarker(sample.locations[i].lat,sample.locations[i].lon);
@@ -101,7 +92,7 @@ function changeTheme(theme) {
 
 
 </script>
-<canvas class="mapcanvas" id="myCanvas" width="960" height="500">
+<canvas id="myCanvas">
 Your browser does not support the HTML5 canvas tag.
 </canvas><p>
 <select onchange="changeTheme(this.value)">
