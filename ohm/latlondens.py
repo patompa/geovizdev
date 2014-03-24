@@ -1,5 +1,5 @@
 from geohash import encode
-f=open('../sample2.tsv')
+f=open('../sample1.tsv')
 lines = f.read().strip().split('\n')
 areas = {}
 for line in lines[1:]:

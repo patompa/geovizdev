@@ -1,4 +1,4 @@
-lot	lon	time	state	statename	county	countyname	city	zip
+lat	lon	time	state	statename	county	countyname	city	zip
 26.58886445	-81.93072577	2012-12-13	FL	Florida	12071	Lee	Cape Coral	33904
 40.5838004	-81.3631182	2012-12-10	OH	Ohio	39157	Tuscarawas	Mineral City	44656
 40.66546325	-74.1200148	2012-12-11	NJ	New Jersey	34017	Hudson	Bayonne	07002
