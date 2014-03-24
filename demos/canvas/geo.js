@@ -13,6 +13,12 @@ var Geo = function(canvas,options) {
   var ctx=myCanvas.getContext("2d");
   var theme = 'classic';
   var points = [];
+  function drawOrigin(x,y,r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+    ctx.fillStyle = "black";
+    ctx.fill();
+  }
   function drawPoint(x,y,r,i) {
     points.push([x,y,r,i]);
     ctx.globalCompositeOperation = "lighter";
@@ -38,6 +44,20 @@ var Geo = function(canvas,options) {
     for (var i=0; i< oldpoints.length;i++) {
        p = oldpoints[i]; 
        drawPoint(p[0],p[1],p[2],p[3]);
+    }
+  }
+  function showPoints() {
+    ctx.clearRect(0,0,myCanvas.width,myCanvas.height);
+    for (var i=0; i< points.length;i++) {
+       p = points[i]; 
+       drawOrigin(p[0],p[1],5);
+    }
+  }
+  function showSizes() {
+    ctx.clearRect(0,0,myCanvas.width,myCanvas.height);
+    for (var i=0; i< points.length;i++) {
+       p = points[i]; 
+       drawOrigin(p[0],p[1],p[2]);
     }
   }
 
@@ -85,6 +105,8 @@ var Geo = function(canvas,options) {
           clear: clear,
           clearColor: clearColor,
           colorize: colorize,
+          showPoints: showPoints,
+          showSizes: showSizes,
           changeTheme: changeTheme};
 }
   
