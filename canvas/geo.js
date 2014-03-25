@@ -5,6 +5,9 @@ var Geo = function(canvas,options) {
   if (typeof(options.maxcolor) === "undefined") {
      options.maxcolor = 200;
   }
+  if (typeof(options.monocolor) === "undefined") {
+     options.monocolor = [255,0,0];
+  }
   var opt = options;
   var myCanvas = canvas;
   if (typeof(options.align) !== "undefined") {
@@ -74,10 +77,18 @@ var Geo = function(canvas,options) {
         continue;
       }
       score = luminance(r,g,b)
-      col = COLORTHEME[theme][255-score];
-      pix[i] = col[0]
-      pix[i+1] = col[1]
-      pix[i+2] = col[2] 
+
+      if (theme !== "mono") {
+        col = COLORTHEME[theme][255-score];
+        pix[i] = col[0];
+        pix[i+1] = col[1];
+        pix[i+2] = col[2]; 
+      } else {
+          pix[i] = opt.monocolor[0];
+          pix[i+1] = opt.monocolor[1];
+          pix[i+2] = opt.monocolor[2];
+      }
+      pix[i+3] = score;
     }
     ctx.putImageData(imgd, 0, 0);
   }
