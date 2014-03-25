@@ -2,6 +2,8 @@
 <meta charset="utf-8">
 <style>
 
+body {background-color:#FFCC99;}
+
 .land {
   fill: #888;
 }
@@ -25,6 +27,7 @@
   fill: none;
   stroke: #000;
   stroke-width: .5px;
+  z-index: 100;
 }
 
 </style>
@@ -59,57 +62,61 @@ var hexbin = d3.hexbin()
     .size([width, height])
     .radius(5);
 
+function drawMap() {
+ d3.json("us.json", function(error, us) {
 
-d3.json("../d3/us.json", function(error, us) {
-  svg.insert("path", ".graticule")
+   svg.insert("path", ".graticule")
       .datum(topojson.feature(us, us.objects.land))
       .attr("class", "land")
       .attr("d", path);
 
-  svg.insert("path", ".graticule")
+   svg.insert("path", ".graticule")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
       .attr("class", "state-boundary")
       .attr("d", path);
-});
+  
+   drawHexagons();
+ });
+};
 
-var points = [];
-
-function drawMarker(lat,lon) {
-   xy = projection([lon,lat]);
-   if (xy == null) {
-       return;
-   }
-   points.push(xy);
-}
 
 d3.select(self.frameElement).style("height", height + "px");
 
+var points = [];
 $( document ).ready(function() {
-   d3.json("../utils/sample1.json", function(error, sample) {
-    for (var i = 0; i < sample.locations.length; i++) {
-       drawMarker(sample.locations[i].lat,sample.locations[i].lon);
-    }
-      
-
-    svg.append("clipPath")
-    .attr("id", "clip")
-    .append("rect")
-    .attr("class", "mesh")
-    .attr("width", width)
-    .attr("height", height);
-
-    svg.append("g")
-     .attr("clip-path", "url(#clip)")
-     .selectAll(".hexagon")
-     .data(hexbin(points))
-     .enter().append("path")
-     .attr("class", "hexagon")
-     .attr("d", hexbin.hexagon())
-     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-     .style("fill", function(d) { return color(d.length); });
-   })
+   drawMap();
 });
 
-</script>
+function drawHexagons() {
+  d3.json("../utils/sample1.json", function(error, sample) {
+     for (var i = 0; i < sample.locations.length; i++) {
+       var point = projection([sample.locations[i].lon,sample.locations[i].lat]);
+       if (point !== null) {
+         points.push(point);
+       }
+     }
+      
+
+     svg.append("clipPath")
+       .attr("id", "clip")
+       .append("rect")
+       .attr("class", "mesh")
+       .attr("width", width)
+       .attr("height", height);
+
+     svg.append("g")
+       .attr("clip-path", "url(#clip)")
+       .selectAll(".hexagon")
+       .data(hexbin(points))
+       .enter().append("path")
+       .attr("class", "hexagon")
+       .attr("d", hexbin.hexagon())
+       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+       .style("fill", function(d) { return color(d.length); });
+  });
+};
+
+</script><p>
+<a href="index.html">Show county borders</a>
 </body>
 </html>
