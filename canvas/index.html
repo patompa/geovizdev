@@ -63,7 +63,7 @@ $( "#myDrawCanvas" ).mouseup(function(e) {
 
 
 $( document ).ready(function() {
-   geo = Geo(document.getElementById("myCanvas"));
+   geo = Geo(document.getElementById("myCanvas"),{usealpha:false});
    geoDraw = Geo(document.getElementById("myDrawCanvas"));
 });
 
@@ -79,7 +79,6 @@ intensity and the distance you drag determines size.<p>
         <option>omg</option>
         <option>pbj</option>
         <option>pgaitch</option>
-        <option>mono</option>
 </select>
 
 <button onclick="geo.colorize()">Colorize</button>
