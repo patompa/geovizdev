@@ -8,6 +8,9 @@ var Geo = function(canvas,options) {
   if (typeof(options.monocolor) === "undefined") {
      options.monocolor = [255,0,0];
   }
+  if (typeof(options.usealpha) === "undefined") {
+     options.usealpha = true;
+  }
   var opt = options;
   var myCanvas = canvas;
   if (typeof(options.align) !== "undefined") {
@@ -88,7 +91,9 @@ var Geo = function(canvas,options) {
           pix[i+1] = opt.monocolor[1];
           pix[i+2] = opt.monocolor[2];
       }
-      pix[i+3] = score;
+      if (opt.usealpha) {
+          pix[i+3] = score;
+      }
     }
     ctx.putImageData(imgd, 0, 0);
   }
