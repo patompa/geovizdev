@@ -16,7 +16,7 @@ function onMapCreated()
 {
     var map = $.getOpenHeatMap();
     map.setLatLonViewingArea(50, -126.58, 15, -66.73)
-    map.loadWaysFromFile('us_counties.osm');
+    map.loadWaysFromFile("http://" + window.location.href + '/us_counties.osm');
     map.loadValuesFromFile('county.csv');
     map.setSetting('show_map_tiles', true);
 }
