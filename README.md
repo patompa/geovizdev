@@ -8,17 +8,17 @@ Route Planning and Visualization using Geo-social Media Data
 
 Tools Used:
 
-canvas
+Draw-It-Yourself: canvas
 -------
 HTML5 canvas
 
 D3 https://github.com/mbostock/d3
 
-D3
+Data-Driven Documents: D3
 -------
 D3 http://bl.ocks.org/mbostock/4060606
 
-fusionheat
+Server-side Rendering: fusionheat
 -------
 Stamen Design Tiles http://maps.stamen.com/test/google.html
 
@@ -28,11 +28,11 @@ Google Fusion Tables https://developers.google.com/maps/documentation/javascript
 
 Google Maps Javascript API https://developers.google.com/maps/documentation/javascript/tutorial
 
-ohm
+Visualizing Time: ohm
 -------
 Open Heat Map https://github.com/petewarden/openheatmap
 
-route
+Route Visualization: route
 -------
 Google Maps Direction API https://developers.google.com/maps/documentation/directions/
 
@@ -40,7 +40,7 @@ RouteBoxer http://google-maps-utility-library-v3.googlecode.com/svn/trunk/routeb
 
 Mongolabs https://mongolab.com/welcome/
 
-script
+Scripting: script
 -------
 sethoscope python heatmap http://www.sethoscope.net/heatmap/
 
