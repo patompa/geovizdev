@@ -74,7 +74,7 @@ d3.select(self.frameElement).style("height", height + "px");
 
 $( document ).ready(function() {
    var myCanvas = document.getElementById("myCanvas");
-   geo = Geo(myCanvas, {maxcolor:5, align: svg[0][0]});
+   geo = Geo(myCanvas, {maxcolor:5, align: svg[0][0], blursize: 3});
    
    d3.json("../utils/sample1.json", function(error, sample) {
       for (var i = 0; i < sample.locations.length; i++) {
