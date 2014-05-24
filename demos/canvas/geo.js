@@ -11,6 +11,9 @@ var Geo = function(canvas,options) {
   if (typeof(options.usealpha) === "undefined") {
      options.usealpha = true;
   }
+  if (typeof(options.blursize) === "undefined") {
+     options.blursize = 10;
+  }
   var opt = options;
   var myCanvas = canvas;
   if (typeof(options.align) !== "undefined") {
@@ -41,6 +44,10 @@ var Geo = function(canvas,options) {
     var ctx=myCanvas.getContext("2d");
     ctx.clearRect(0,0,myCanvas.width,myCanvas.height);
     points = [];
+  }
+ 
+  function blur() {
+     stackBlurCanvasRGB(myCanvas.getAttribute("id"),0,0,myCanvas.width,myCanvas.height,opt.blursize);
   }
 
   function clearColor() {
@@ -119,6 +126,7 @@ var Geo = function(canvas,options) {
 
   return {drawPoint:drawPoint,
           clear: clear,
+          blur: blur,
           clearColor: clearColor,
           colorize: colorize,
           showPoints: showPoints,
